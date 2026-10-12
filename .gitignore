@@ -1,0 +1,21 @@
+# secrets / local config
+.env
+.env.*
+!.env.example
+
+# PHP
+dashboard/vendor/
+dashboard/.phpunit.cache/
+dashboard/.phpunit.result.cache
+
+# Go build output
+/ingestion/bin/
+/agent/dist/
+*.exe
+*.test
+
+# editors / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

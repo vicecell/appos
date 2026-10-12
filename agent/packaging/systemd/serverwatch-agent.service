@@ -1,0 +1,37 @@
+[Unit]
+Description=ServerWatch monitoring agent
+Documentation=https://example.invalid/serverwatch/docs
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=serverwatch
+Group=serverwatch
+# SERVERWATCH_SERVER_URL lives here; file must be mode 0600 owned by root or serverwatch.
+EnvironmentFile=/etc/serverwatch/agent.env
+ExecStart=/usr/local/bin/serverwatch-agent
+Restart=on-failure
+RestartSec=10
+StateDirectory=serverwatch
+StateDirectoryMode=0700
+
+# Least privilege: outbound HTTPS only, no inbound ports, no extra capabilities.
+NoNewPrivileges=true
+CapabilityBoundingSet=
+AmbientCapabilities=
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=multi-user.target

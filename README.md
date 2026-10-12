@@ -76,7 +76,7 @@ The agent initiates outbound connections; monitored hosts do not need an inbound
 
 | Layer | Planned technology |
 | --- | --- |
-| Web dashboard / control plane | PHP Native 8.3+, JavaScript, Bootstrap 5, Apache ECharts |
+| Web dashboard / control plane | PHP Native 8.2+, JavaScript, Bootstrap 5, Apache ECharts |
 | Application database | MySQL 8 |
 | Linux host agent | Go, systemd |
 | Telemetry ingestion | Go REST service |
@@ -130,17 +130,17 @@ This is the target structure; individual directories may not exist until the res
 
 ## Getting started
 
-**There is no public production installation or stable agent release yet.** Please do not assume that installation scripts or Docker Compose configurations exist until they are committed and documented in this repository.
+**There is no public production installation or stable agent release yet.** The repository currently contains the Sprint 0 scaffold only: health endpoints, a reversible migration runner, HTTPS-only agent config validation, CI, and a development-only Docker Compose stack (`deploy/docker-compose.dev.yml`). Auth, multi-tenancy, collectors, and ingestion are not implemented.
 
-For contributors and developers working from an initial scaffold:
+For contributors and developers:
 
-1. Clone this repository after its source code is published.
-2. Review `CLAUDE.md` and the technical specification in `docs/` (when available).
-3. Configure local development using the committed `.env.example` and deployment instructions.
-4. Run migrations and tests following the instructions added with each module.
+1. Review `CLAUDE.md` and the technical specification in `bahan/`.
+2. Copy `.env.example` to `.env` and fill in the empty secrets (never commit `.env`).
+3. Start the dev stack: `docker compose --env-file .env -f deploy/docker-compose.dev.yml up -d`.
+4. Run all quality gates: `sh scripts/check.sh` (needs PHP 8.2 + Composer on the host and Docker; Go runs in a container).
 5. Enroll **test servers only** until agent security, resource usage, and uninstall procedures are verified.
 
-Documentation and executable setup commands will be added as the implementation progresses.
+Details: `docs/runbooks.md`. Architecture decision: `docs/adr/0001-architecture.md`. Threat model: `docs/security.md`.
 
 ## Developing with Claude Agent in Zed
 

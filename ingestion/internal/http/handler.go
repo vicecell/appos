@@ -6,8 +6,8 @@ import (
 	nethttp "net/http"
 )
 
-// NewHandler builds the ingestion router. Sprint 0 only serves a health probe;
-// agent endpoints (/api/v1/agent/*) arrive in Sprint 2/3.
+// NewHandler builds the ingestion router. SW-001 only serves a health probe;
+// agent endpoints (/api/v1/agent/*) arrive in SW-003/SW-004.
 func NewHandler() nethttp.Handler {
 	mux := nethttp.NewServeMux()
 	mux.HandleFunc("GET /healthz", healthz)

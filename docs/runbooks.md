@@ -18,10 +18,10 @@ sh scripts/check.sh dashboard    # or: ingestion | agent | compose
 ```
 
 To include the MySQL integration test, export the `.env` variables first (`set -a; . ./.env; set +a`) with the
-dev stack running; without `DB_*` that test is skipped.
+dev stack running; the check container then joins the compose network. Without `DB_PASSWORD` that test is skipped.
 
-Go runs in `golang:1.22-alpine` via Docker, so no local Go toolchain is needed.
+PHP 8.3 (`deploy/php-dev/Dockerfile`) and Go 1.22 run in containers, so Docker is the only host requirement.
 
 ## Production
 
-Not covered in Sprint 0. Production runbooks (deploy, backup/restore, agent rollout, uninstall) are Sprint 7-8.
+Not covered in SW-001. Production runbooks (deploy, backup/restore, agent rollout, uninstall) arrive with SW-007 (load test, backup/restore) and pilot hardening.

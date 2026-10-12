@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace ServerWatch\Core;
 
 /**
- * Minimal request dispatcher. Sprint 0 serves only /health; the real router,
- * session/CSRF and tenant authorization middleware arrive in Sprint 1.
+ * Minimal request dispatcher. SW-001 serves only /health; the real router,
+ * session/CSRF and tenant authorization middleware arrive in SW-002.
  */
 final class Kernel
 {

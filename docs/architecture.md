@@ -9,5 +9,5 @@ PHP dashboard / REST <--- MySQL + VictoriaMetrics query gateway
 PHP CLI workers: website/TLS/DNS/RDAP checks, GA4 sync, alert dispatch
 ```
 
-Implemented so far (Sprint 0): `dashboard` health endpoint and migration runner, `ingestion` health endpoint,
+Implemented so far (SW-001): `dashboard` health endpoint and migration runner, `ingestion` health endpoint,
 `agent` config validation, dev compose stack. Nothing else is wired up yet.

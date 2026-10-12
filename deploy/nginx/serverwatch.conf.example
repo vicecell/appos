@@ -41,7 +41,7 @@ server {
         root /var/www/serverwatch/dashboard/public;
         include fastcgi_params;
         fastcgi_param SCRIPT_FILENAME $document_root/index.php;
-        fastcgi_pass unix:/run/php/php8.2-fpm.sock;
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
     }
 
     location ~ /\. { deny all; }

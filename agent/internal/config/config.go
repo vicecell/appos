@@ -10,7 +10,7 @@ import (
 )
 
 // Config holds agent settings. The enrollment token is deliberately not part
-// of this struct: it is read from a 0600 file at enroll time (Sprint 2) so it
+// of this struct: it is read from a 0600 file at enroll time (SW-003) so it
 // never lands in env dumps, shell history, or logs.
 type Config struct {
 	ServerURL string // base URL of the ingestion API; HTTPS only

@@ -76,7 +76,7 @@ The agent initiates outbound connections; monitored hosts do not need an inbound
 
 | Layer | Planned technology |
 | --- | --- |
-| Web dashboard / control plane | PHP Native 8.2+, JavaScript, Bootstrap 5, Apache ECharts |
+| Web dashboard / control plane | PHP Native 8.3+, JavaScript, Bootstrap 5, Apache ECharts |
 | Application database | MySQL 8 |
 | Linux host agent | Go, systemd |
 | Telemetry ingestion | Go REST service |
@@ -130,14 +130,14 @@ This is the target structure; individual directories may not exist until the res
 
 ## Getting started
 
-**There is no public production installation or stable agent release yet.** The repository currently contains the Sprint 0 scaffold only: health endpoints, a reversible migration runner, HTTPS-only agent config validation, CI, and a development-only Docker Compose stack (`deploy/docker-compose.dev.yml`). Auth, multi-tenancy, collectors, and ingestion are not implemented.
+**There is no public production installation or stable agent release yet.** The repository currently contains the SW-001 scaffold only: health endpoints, a reversible migration runner, HTTPS-only agent config validation, CI, and a development-only Docker Compose stack (`deploy/docker-compose.dev.yml`). Auth, multi-tenancy, collectors, and ingestion are not implemented.
 
 For contributors and developers:
 
 1. Review `CLAUDE.md` and the technical specification in `bahan/`.
 2. Copy `.env.example` to `.env` and fill in the empty secrets (never commit `.env`).
 3. Start the dev stack: `docker compose --env-file .env -f deploy/docker-compose.dev.yml up -d`.
-4. Run all quality gates: `sh scripts/check.sh` (needs PHP 8.2 + Composer on the host and Docker; Go runs in a container).
+4. Run all quality gates: `sh scripts/check.sh` (needs Docker only; PHP 8.3 and Go run in containers).
 5. Enroll **test servers only** until agent security, resource usage, and uninstall procedures are verified.
 
 Details: `docs/runbooks.md`. Architecture decision: `docs/adr/0001-architecture.md`. Threat model: `docs/security.md`.

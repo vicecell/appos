@@ -8,4 +8,4 @@ composite indexes, no raw metric samples in MySQL.
 Migrations live in `dashboard/database/migrations/` as `NNNN_name.up.sql` + `NNNN_name.down.sql`. Applied versions
 are tracked in `schema_migrations`. Run with `php dashboard/bin/migrate.php up|down|status` (`down` reverts one step).
 
-Sprint 0: no domain tables yet; they start in Sprint 1.
+SW-001: no domain tables yet; they start in SW-002.

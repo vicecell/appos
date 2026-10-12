@@ -26,6 +26,6 @@ func main() {
 		os.Exit(2)
 	}
 
-	// Collectors, transport and enrollment arrive in Sprint 2.
-	fmt.Fprintf(os.Stderr, "serverwatch-agent %s: config ok (%s); collectors not implemented in Sprint 0\n", version, cfg.ServerURL)
+	// Collectors, transport and enrollment arrive in SW-003 (enrollment) and SW-004 (metrics).
+	fmt.Fprintf(os.Stderr, "serverwatch-agent %s: config ok (%s); collectors not implemented in SW-001\n", version, cfg.ServerURL)
 }

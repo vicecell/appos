@@ -33,17 +33,34 @@ final class Response
     }
 
     /**
-     * Structured error per spec: {error:{code,message,request_id}}.
+     * Structured error per spec: {error:{code,message,request_id}} (+ details for validation).
+     *
+     * @param array<string, string>|null $details
      */
-    public static function error(int $status, string $code, string $message, string $requestId): self
-    {
-        return self::json($status, [
-            'error' => ['code' => $code, 'message' => $message, 'request_id' => $requestId],
-        ]);
+    public static function error(
+        int $status,
+        string $code,
+        string $message,
+        string $requestId,
+        ?array $details = null,
+    ): self {
+        $error = ['code' => $code, 'message' => $message, 'request_id' => $requestId];
+        if ($details !== null) {
+            $error['details'] = $details;
+        }
+        return self::json($status, ['error' => $error]);
     }
 
     public function withHeader(string $name, string $value): self
     {
         return new self($this->status, [...$this->headers, $name => $value], $this->body);
+    }
+
+    /**
+     * @param array<string, string> $headers
+     */
+    public function withHeaders(array $headers): self
+    {
+        return new self($this->status, [...$this->headers, ...$headers], $this->body);
     }
 }

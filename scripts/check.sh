@@ -16,7 +16,7 @@ check_dashboard() {
   net_args=""
   if [ -n "${DB_PASSWORD:-}" ] && docker network inspect "$DEV_NETWORK" >/dev/null 2>&1; then
     # Join the dev compose network so the container reaches MySQL as host "mysql".
-    net_args="--network $DEV_NETWORK -e DB_HOST=mysql -e DB_PORT=3306 -e DB_NAME=${DB_NAME:-serverwatch} -e DB_USER=${DB_USER:-serverwatch} -e DB_PASSWORD"
+    net_args="--network $DEV_NETWORK -e DB_HOST=mysql -e DB_PORT=3306 -e DB_NAME=${DB_NAME:-serverwatch} -e DB_TEST_NAME=${DB_TEST_NAME:-serverwatch_test} -e DB_USER=${DB_USER:-serverwatch} -e DB_PASSWORD"
   fi
   # shellcheck disable=SC2086
   MSYS_NO_PATHCONV=1 docker run --rm $net_args -v "$ROOT/dashboard:/app" -w /app "$PHP_IMAGE" \

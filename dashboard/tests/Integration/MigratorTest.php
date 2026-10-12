@@ -8,69 +8,83 @@ use PDO;
 use PHPUnit\Framework\TestCase;
 use ServerWatch\Core\MigrationCatalog;
 use ServerWatch\Core\Migrator;
+use ServerWatch\Tests\Support\IntegrationTestCase;
 
 /**
- * Needs a MySQL 8 instance (DB_HOST/DB_PORT/DB_NAME/DB_USER/DB_PASSWORD); skipped otherwise.
- * Uses a throwaway table name prefix and cleans up after itself.
+ * Applies the REAL migrations to the throwaway *_test database: up, full rollback one step at a time, up again.
+ * DDL commits implicitly, so this test manages its own state and always leaves the schema fully migrated.
  */
 final class MigratorTest extends TestCase
 {
     private PDO $pdo;
-    private string $dir;
+    private MigrationCatalog $catalog;
 
     protected function setUp(): void
     {
-        $name = getenv('DB_NAME');
-        $user = getenv('DB_USER');
-        $pass = getenv('DB_PASSWORD');
-        if ($name === false || $user === false || $pass === false) {
-            self::markTestSkipped('DB_* environment not set');
-        }
-        $dsn = sprintf(
-            'mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4',
-            getenv('DB_HOST') ?: '127.0.0.1',
-            getenv('DB_PORT') ?: '3306',
-            $name,
-        );
-        $this->pdo = new PDO($dsn, $user, $pass, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
-        $this->pdo->exec('DROP TABLE IF EXISTS schema_migrations, it_probe');
-
-        $this->dir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'sw_it_' . bin2hex(random_bytes(4));
-        mkdir($this->dir);
-        file_put_contents(
-            $this->dir . '/0001_probe.up.sql',
-            'CREATE TABLE it_probe (id BIGINT UNSIGNED PRIMARY KEY) ENGINE=InnoDB;',
-        );
-        file_put_contents($this->dir . '/0001_probe.down.sql', 'DROP TABLE it_probe;');
+        $this->pdo = IntegrationTestCase::connectTestDb();
+        $this->catalog = new MigrationCatalog(__DIR__ . '/../../database/migrations');
+        IntegrationTestCase::dropAllTables($this->pdo);
     }
 
     protected function tearDown(): void
     {
         if (isset($this->pdo)) {
-            $this->pdo->exec('DROP TABLE IF EXISTS schema_migrations, it_probe');
-        }
-        foreach (glob($this->dir . '/*') ?: [] as $f) {
-            unlink($f);
-        }
-        if (is_dir($this->dir)) {
-            rmdir($this->dir);
+            IntegrationTestCase::dropAllTables($this->pdo);
+            (new Migrator($this->pdo, $this->catalog))->up();
         }
     }
 
-    public function testUpIsIdempotentAndDownReverts(): void
+    /**
+     * @return list<string>
+     */
+    private function tables(): array
     {
-        $migrator = new Migrator($this->pdo, new MigrationCatalog($this->dir));
+        $rows = $this->pdo->query('SHOW TABLES');
+        self::assertNotFalse($rows);
+        $names = array_map('strval', $rows->fetchAll(PDO::FETCH_COLUMN));
+        sort($names);
+        return $names;
+    }
 
-        self::assertSame(['0001_probe'], $migrator->up());
-        self::assertSame([], $migrator->up(), 'second run must be a no-op');
-        self::assertSame(['0001_probe'], $migrator->applied());
-        self::assertNotFalse($this->pdo->query('SELECT 1 FROM it_probe'));
+    public function testRealMigrationsApplyRollBackStepwiseAndReapply(): void
+    {
+        $migrator = new Migrator($this->pdo, $this->catalog);
+        $ids = array_keys($this->catalog->all());
+        self::assertGreaterThanOrEqual(7, count($ids));
 
-        self::assertSame('0001_probe', $migrator->down());
+        self::assertSame($ids, $migrator->up());
+        self::assertSame([], $migrator->up(), 'idempotent');
+        $full = $this->tables();
+        foreach (['organizations', 'users', 'organization_members', 'sessions', 'servers', 'audit_logs', 'platform_grants'] as $t) {
+            self::assertContains($t, $full);
+        }
+
+        foreach (array_reverse($ids) as $id) {
+            self::assertSame($id, $migrator->down());
+        }
         self::assertNull($migrator->down());
-        self::assertSame([], $migrator->applied());
-        $tables = $this->pdo->query("SHOW TABLES LIKE 'it_probe'");
-        self::assertNotFalse($tables);
-        self::assertSame(0, $tables->rowCount());
+        self::assertSame(['schema_migrations'], $this->tables(), 'every migration must be fully reversible');
+
+        self::assertSame($ids, $migrator->up());
+        self::assertSame($full, $this->tables());
+    }
+
+    public function testEveryTenantScopedTableHasOrganizationIdAndAnIndexLeadingWithIt(): void
+    {
+        (new Migrator($this->pdo, $this->catalog))->up();
+        $exempt = ['organizations', 'users', 'sessions', 'login_attempts', 'schema_migrations', 'platform_grants'];
+
+        foreach ($this->tables() as $table) {
+            if (in_array($table, $exempt, true)) {
+                continue;
+            }
+            $cols = $this->pdo->query("SHOW COLUMNS FROM `{$table}`");
+            self::assertNotFalse($cols);
+            self::assertContains('organization_id', $cols->fetchAll(PDO::FETCH_COLUMN), "{$table} lacks organization_id");
+
+            $idx = $this->pdo->query("SHOW INDEX FROM `{$table}` WHERE Seq_in_index = 1 AND Column_name = 'organization_id'");
+            self::assertNotFalse($idx);
+            self::assertNotEmpty($idx->fetchAll(), "{$table} has no index leading with organization_id");
+        }
     }
 }

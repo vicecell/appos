@@ -40,6 +40,24 @@ notification channel secrets, GA4 refresh tokens, audit logs.
 - Migrator never drops anything outside a migration's own `.down.sql`; reversibility is enforced.
 - CI runs lint/static analysis/tests for all three components.
 
+## SW-002 controls in place (see ADR 0002; pending manual security review)
+
+- T4/T9: tenant authorization happens once in the kernel before any handler; non-members get an indistinguishable 404.
+  Tenant-scoped repositories take `organizationId` first (reflection test), composite FKs block cross-tenant
+  references in the database (`SchemaTest`). `TenantIsolationTest`/`PlatformAdminTest` cover IDOR, body-supplied tenant
+  ids, role-per-tenant, disabled members, suspended orgs, and platform admins without grants.
+- Verified by mutation: removing the tenant filter from repositories, giving platform admins implicit access, removing
+  the CSRF check, widening the viewer role, skipping the password check and allowing TOTP replay each make tests fail.
+- T11: server-side revocable sessions (hashed token), HttpOnly/SameSite cookies, per-session CSRF token, MFA enforced for
+  platform admins and client admins, TOTP replay blocked atomically.
+- T6/T12: audit log for logins, logouts, server changes, grants and denied cross-tenant attempts; metadata keys that look
+  like secrets are rejected; error responses and logs never include exception messages.
+- Brute force: per-account and per-IP failure throttling with `Retry-After`; unknown/disabled/wrong-password logins are
+  indistinguishable in body and timing.
+
+Not yet covered: password reset, self-service MFA enrollment/recovery, trusted-proxy handling for client IPs, and
+database-enforced append-only audit rows (see ADR 0002 "Known limitations").
+
 ## Out of scope for now
 
 Production TLS/cert management, secrets manager integration, code signing of agent releases (required before any

@@ -8,4 +8,12 @@
     <file>tests</file>
     <file>bin</file>
     <rule ref="PSR12"/>
+    <!-- PSR-12 soft limit is 120; long SQL/test lines are tolerated up to 140 before a warning. -->
+    <rule ref="Generic.Files.LineLength">
+        <properties>
+            <property name="lineLimit" value="140"/>
+            <property name="absoluteLineLimit" value="0"/>
+        </properties>
+        <exclude-pattern>tests/*</exclude-pattern>
+    </rule>
 </ruleset>

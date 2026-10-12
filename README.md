@@ -130,7 +130,7 @@ This is the target structure; individual directories may not exist until the res
 
 ## Getting started
 
-**There is no public production installation or stable agent release yet.** The repository currently contains the SW-001 scaffold only: health endpoints, a reversible migration runner, HTTPS-only agent config validation, CI, and a development-only Docker Compose stack (`deploy/docker-compose.dev.yml`). Auth, multi-tenancy, collectors, and ingestion are not implemented.
+**There is no public production installation or stable agent release yet.** The repository currently contains SW-001 (scaffold, CI, dev stack) and SW-002 (tenant-aware authentication, RBAC, audit, provisioning CLI; pending manual security review). Agent enrollment, collectors, and telemetry ingestion are not implemented.
 
 For contributors and developers:
 

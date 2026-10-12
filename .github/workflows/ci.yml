@@ -11,6 +11,27 @@ permissions:
 jobs:
   dashboard:
     runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ci-root
+          MYSQL_DATABASE: serverwatch_test
+          MYSQL_USER: serverwatch
+          MYSQL_PASSWORD: ci-password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -pci-root --silent"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    env:
+      # Throwaway CI database; tests refuse to run against any name not ending in _test.
+      DB_HOST: 127.0.0.1
+      DB_PORT: "3306"
+      DB_NAME: serverwatch_test
+      DB_TEST_NAME: serverwatch_test
+      DB_USER: serverwatch
+      DB_PASSWORD: ci-password
     defaults:
       run:
         working-directory: dashboard
@@ -19,6 +40,7 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: "8.3"
+          extensions: pdo_mysql, sodium
           tools: composer:v2
           coverage: none
       - run: composer install --no-interaction --no-progress
